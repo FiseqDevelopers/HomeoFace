@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { MainCamera } from './components';
+import { StyleSheet, View } from 'react-native';
+import { MainCamera, Notifications } from './components';
 import Swiper from 'react-native-swiper';
 
 export default class App extends React.Component {
@@ -10,8 +10,7 @@ export default class App extends React.Component {
         <View style={styles.container}>
         </View>
         <MainCamera />
-        <View style={styles.container}>
-        </View>
+        <Notifications style={{flex: 1}} />
       </Swiper>
     );
   }

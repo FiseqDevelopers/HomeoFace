@@ -1,3 +1,5 @@
 import MainCamera from './camera';
+import Block from './block';
+import Card from './card';
 
-export {MainCamera}
+export { MainCamera, Block, Card }
