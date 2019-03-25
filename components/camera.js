@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, SafeAreaView, CameraRoll, Platform } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor } from 'react-native';
 import { Camera, Permissions, ImagePicker } from 'expo';
 
 export default class MainCamera extends React.Component {
@@ -11,12 +11,18 @@ export default class MainCamera extends React.Component {
             type: Camera.Constants.Type.back,
             hasCameraRollPermission: null,
             photos: [
-                {key: 1, imageSource: null},
-                {key: 2, imageSource: null},
-                {key: 3, imageSource: null}],
+                {key: 'left_side', imageSource: null},
+                {key: 'front_side', imageSource: null},
+                {key: 'right_side', imageSource: null}],
             isAllSet: false,
             platform: Platform.OS,
-            count: 0
+            count: 0,
+            uploadData: {
+                guid_id: '',
+                front_side: '',
+                left_side: '',
+                right_side: ''
+            }
         };
         this._pickImage.bind(this);
     }
@@ -36,73 +42,73 @@ export default class MainCamera extends React.Component {
         } else {
         return (
             <View style={styles.container}>
-            { this.renderCamera() }
-            <View style={styles.bottomBar}>
-                <View style={styles.gallery} >
-                <TouchableOpacity>
-                    <Image source={require('../images/notifications.png')} style={{width: 40, height: 40}}/>
-                </TouchableOpacity>
-                </View>
-                <View style={styles.shutterButton} >
-                <TouchableOpacity onPress={this.snap.bind(this)}>
-                    <Image source={this.state.isAllSet ? require('../images/upload.png') : require('../images/shutter.png')} style={{width: 60, height: 60}}/>
-                </TouchableOpacity>
-                </View>
-                <View style={styles.notifications} >
-                    <TouchableOpacity
-                    onPress={() => {
-                        this.setState({
-                        type: this.state.type === Camera.Constants.Type.back
-                            ? Camera.Constants.Type.front
-                            : Camera.Constants.Type.back,
-                        });
-                    }}>
-                <Image source={require('../images/switch.png')} style={{width: 40, height: 40}}/>
-                </TouchableOpacity>
-                </View>
-            </View>
-            <View style={styles.imageBar}>
-                <View style={styles.nonImage} />
-                {
-                    <View style={{flex: 3, flexDirection: 'row'}} >
-                        {
-                            this.state.photos.map((item, index) => {
-                                if(item.imageSource == null) {
-                                    return(
-                                        <View key={index} style={styles.mainImage} >
-                                            <TouchableOpacity onPress={this._pickImage.bind(this, item.key)} style={styles.exampleImage} >
-                                                <Image 
-                                                    key={item.key}
-                                                    style={{ width: 40, height: 40 }}
-                                                    source={require('../images/exampleImage.png')} />
-                                            </TouchableOpacity>
-                                        </View>
-                                    );
-                                } else {
-                                    return(
-                                        <View key={index} style={styles.mainImage} >
-                                            <TouchableOpacity onPress={this._pickImage.bind(this, item.key)} style={styles.exampleImage} >
-                                                <Image 
-                                                    key={item.key}
-                                                    style={{ width: 40, height: 40 }}
-                                                    source={{uri: item.imageSource}} />
-                                            </TouchableOpacity>
-                                            
-                                            <TouchableOpacity onPress={this._deleteImage.bind(this, item.key)} style={styles.deleteItem}>
-                                                <Image 
-                                                    key={item.key}
-                                                    style={{ width: 20, height: 20 }}
-                                                    source={require('../images/cancel.png')} />
-                                            </TouchableOpacity>
-                                        </View>
-                                    );
-                                }
-                            })
-                        }
+                { this.renderCamera() }
+                <View style={styles.bottomBar}>
+                    <View style={styles.gallery} >
+                        <TouchableOpacity
+                            onPress={() => {
+                                this.setState({
+                                type: this.state.type === Camera.Constants.Type.back
+                                    ? Camera.Constants.Type.front
+                                    : Camera.Constants.Type.back,
+                                });
+                            }}>
+                            <Image source={require('../images/switch.png')} style={{width: 40, height: 40}}/>
+                        </TouchableOpacity>
                     </View>
-                }
-                <View style={styles.nonImage} />
-            </View>
+                    <View style={styles.shutterButton} >
+                        <TouchableOpacity onPress={this.state.isAllSet ?  this.sendData.bind(this) : this.snap.bind(this)}>
+                            <Image source={this.state.isAllSet ? require('../images/upload.png') : require('../images/shutter.png')} style={{width: 60, height: 60}}/>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.notifications} >
+                        <TouchableOpacity>
+                            <Image source={require('../images/notifications.png')} style={{width: 40, height: 40}}/>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={styles.imageBar}>
+                    <View style={styles.nonImage} />
+                    {
+                        <View style={{flex: 3, flexDirection: 'row'}} >
+                            {
+                                this.state.photos.map((item, index) => {
+                                    if(item.imageSource == null) {
+                                        return(
+                                            <View key={index} style={styles.mainImage} >
+                                                <TouchableOpacity onPress={this._pickImage.bind(this, item.key)} style={styles.exampleImage} >
+                                                    <Image 
+                                                        key={item.key}
+                                                        style={{ width: 40, height: 40 }}
+                                                        source={require('../images/exampleImage.png')} />
+                                                </TouchableOpacity>
+                                            </View>
+                                        );
+                                    } else {
+                                        return(
+                                            <View key={index} style={styles.mainImage} >
+                                                <TouchableOpacity onPress={this._pickImage.bind(this, item.key)} style={styles.exampleImage} >
+                                                    <Image 
+                                                        key={item.key}
+                                                        style={{ width: 40, height: 40 }}
+                                                        source={{uri: item.imageSource}} />
+                                                </TouchableOpacity>
+                                                
+                                                <TouchableOpacity onPress={this._deleteImage.bind(this, item.key)} style={styles.deleteItem}>
+                                                    <Image 
+                                                        key={item.key}
+                                                        style={{ width: 20, height: 20 }}
+                                                        source={require('../images/cancel.png')} />
+                                                </TouchableOpacity>
+                                            </View>
+                                        );
+                                    }
+                                })
+                            }
+                        </View>
+                    }
+                    <View style={styles.nonImage} />
+                </View>
             </View>
         );
         }
@@ -147,6 +153,75 @@ export default class MainCamera extends React.Component {
             }
         }
     }
+
+    handleUpload = async function() {
+        var tempUpload = new UploadPhotos('', '', '', '');
+        this.setState({
+            photosWillUpload: tempUpload
+        });
+    }
+
+    handleUploadPhoto = () => {
+        this.state.photos.map((item) => {
+            console.warn(item.imageSource);
+            var imageUrl = '';
+            if(Platform.OS === 'android') {
+                imageUrl = `data:image/jpg;base64,${item.imageSource.replace("file://", "").base64}`;
+            } else {
+                imageUrl = `data:image/jpg;base64,${item.imageSource.base64}`;
+            }
+            console.warn(imageUrl);
+            //imageUri && console.log({uri: imageUri.slice(0, 100)});
+        })
+    };
+
+    sendData = async function() {
+        // Upload the image using the fetch and FormData APIs
+        var example = [{guid_id: 'ac98d30a-6368-48a8-855e-7c5eeb82e8a5'}];
+        var jsonE = JSON.stringify(example);
+        const requests = this.state.photos.map((item) => {
+            let imageSettings = {
+              offset: { x: 0, y: 0 },
+              size: { width: 512, height: 512 }
+            };
+
+            ImageEditor.cropImage(item.imageSource, imageSettings, (uri) => {
+              ImageStore.getBase64ForTag(uri, (data) => {
+                var exampleParsed = JSON.parse(jsonE);
+                console.warn(exampleParsed);
+                if(item.key === 'front_side') {
+                    exampleParsed.push({front_side: data});
+                    jsonE = JSON.stringify(exampleParsed);
+                }
+                else if(item.key === 'left_side'){
+                    exampleParsed.push({left_side: data});
+                    jsonE = JSON.stringify(exampleParsed);
+                }
+                else 
+                {
+                    exampleParsed.push({right_side: data});
+                    jsonE = JSON.stringify(exampleParsed);
+                    console.warn(jsonE);
+                    return fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: jsonE,
+                    });
+                }
+              }, e => console.warn("getBase64ForTag: ", e))
+            }, e => console.warn("cropImage:g ", e))
+        });
+    }
+
+    createFormData = () => {
+        data.append("", 
+            this.state.uploadData
+        );
+      return data;
+    };
 
     snap = async function() {
         if (this.camera) {
@@ -281,9 +356,9 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     deleteItem: {
-        position: 'absolute',
-        alignItems: 'flex-end', 
-        flex: 1, 
-        marginTop: -10
+        position: 'absolute', 
+        flex: 1,
+        right: 0,
+        top: -10
     }
   });

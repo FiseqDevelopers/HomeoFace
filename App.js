@@ -1,17 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { MainCamera } from './components';
+import { StyleSheet } from 'react-native';
+import { MainCamera, Notifications, ModalExample } from './components';
 import Swiper from 'react-native-swiper';
 
 export default class App extends React.Component {
   render() {
     return (
-      <Swiper loop={false} showsPagination={false} index={1}>
-        <View style={styles.container}>
-        </View>
+      <Swiper loop={false} showsPagination={false} index={0}>
+        <ModalExample />
         <MainCamera />
-        <View style={styles.container}>
-        </View>
+        <Notifications style={styles.wrapper} />
       </Swiper>
     );
   }
@@ -22,5 +20,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   wrapper: {
+    flex: 1
   }
+  
 });
