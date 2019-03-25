@@ -177,8 +177,10 @@ export default class MainCamera extends React.Component {
 
     sendData = async function() {
         // Upload the image using the fetch and FormData APIs
-        var example = [{guid_id: 'ac98d30a-6368-48a8-855e-7c5eeb82e8a5'}];
-        var jsonE = JSON.stringify(example);
+        var guid_idT = 'ac98d30a-6368-48a8-855e-7c5eeb82e8a5';
+        var front_sideT = '';
+        var right_sideT = '';
+        var left_sideT = '';
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
               offset: { x: 0, y: 0 },
@@ -187,28 +189,27 @@ export default class MainCamera extends React.Component {
 
             ImageEditor.cropImage(item.imageSource, imageSettings, (uri) => {
               ImageStore.getBase64ForTag(uri, (data) => {
-                var exampleParsed = JSON.parse(jsonE);
-                console.warn(exampleParsed);
                 if(item.key === 'front_side') {
-                    exampleParsed.push({front_side: data});
-                    jsonE = JSON.stringify(exampleParsed);
+                    front_sideT = data;
                 }
                 else if(item.key === 'left_side'){
-                    exampleParsed.push({left_side: data});
-                    jsonE = JSON.stringify(exampleParsed);
+                    left_sideT = data;
                 }
                 else 
                 {
-                    exampleParsed.push({right_side: data});
-                    jsonE = JSON.stringify(exampleParsed);
-                    console.warn(jsonE);
+                    right_sideT = data;
                     return fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    body: jsonE,
+                    body: JSON.stringify({
+                        guid_id: guid_idT,
+                        front_side: front_sideT,
+                        left_side: left_sideT,
+                        right_side: right_sideT
+                    }),
                     });
                 }
               }, e => console.warn("getBase64ForTag: ", e))
