@@ -11,18 +11,18 @@ export default class MainCamera extends React.Component {
             type: Camera.Constants.Type.back,
             hasCameraRollPermission: null,
             photos: [
-                {key: 'left_side', imageSource: null},
-                {key: 'front_side', imageSource: null},
-                {key: 'right_side', imageSource: null}],
+                {key: 'left_side', imageSource: null, width: 0, height: 0},
+                {key: 'front_side', imageSource: null, width: 0, height: 0},
+                {key: 'right_side', imageSource: null, width: 0, height: 0}],
             isAllSet: false,
             platform: Platform.OS,
             count: 0,
-            uploadData: {
-                guid_id: '',
-                front_side: '',
-                left_side: '',
-                right_side: ''
-            }
+            guid_id: '',
+            front_side: '',
+            left_side: '',
+            right_side: '',
+            width: 512,
+            height: 512
         };
         this._pickImage.bind(this);
     }
@@ -123,14 +123,14 @@ export default class MainCamera extends React.Component {
         });
 
         if (!result.cancelled) {
-            this.updateList(key, result.uri);
+            this.updateList(key, result.uri,result.width, result.height);
         }
         this.checkImagesAreSet();
     };
 
     _deleteImage = async (key) => {
         this.setState({isAllSet: false});
-        this.updateList(key, null);
+        this.updateList(key, null, null, null);
     };
 
     _renderPhotos(photos) {
@@ -177,43 +177,50 @@ export default class MainCamera extends React.Component {
 
     sendData = async function() {
         // Upload the image using the fetch and FormData APIs
-        var guid_idT = 'ac98d30a-6368-48a8-855e-7c5eeb82e8a5';
-        var front_sideT = '';
-        var right_sideT = '';
-        var left_sideT = '';
+        var uuid = require('react-native-uuid');
+        this.setState({guid_id: uuid.v1()});
+        console.warn(this.state.guid_id);
+        
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
-              offset: { x: 0, y: 0 },
-              size: { width: 512, height: 512 }
+                offset: { x: 0, y: 0 },
+                size: { width: item.width, height: item.height }
             };
 
             ImageEditor.cropImage(item.imageSource, imageSettings, (uri) => {
               ImageStore.getBase64ForTag(uri, (data) => {
                 if(item.key === 'front_side') {
-                    front_sideT = data;
-                }
-                else if(item.key === 'left_side'){
-                    left_sideT = data;
-                }
-                else 
-                {
-                    right_sideT = data;
-                    return fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
-                    method: 'POST',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        guid_id: guid_idT,
-                        front_side: front_sideT,
-                        left_side: left_sideT,
-                        right_side: right_sideT
-                    }),
+                    this.setState({
+                        front_side: data
                     });
                 }
+                else if(item.key === 'left_side'){
+                    this.setState({
+                        left_side: data
+                    });
+                }
+                else if(item.key === 'right_side') {
+                    this.setState({
+                        right_side: data
+                    });
+                } else {
+                }
               }, e => console.warn("getBase64ForTag: ", e))
-            }, e => console.warn("cropImage:g ", e))
+            }, e => console.warn("cropImage:g ", e));
+        });
+
+        return fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                guid_id: this.state.guid_id,
+                front_side: this.state.front_side,
+                left_side: this.state.left_side,
+                right_side: this.state.right_side
+            }),
         });
     }
 
@@ -226,14 +233,14 @@ export default class MainCamera extends React.Component {
 
     snap = async function() {
         if (this.camera) {
-        const options = { quality: 1, base64: true };
+        const options = { quality: 0.5, base64: true };
         await this.camera.takePictureAsync(options).then(data => {
             CameraRoll.saveToCameraRoll(data.uri);
 
             var setOne = false;
             this.state.photos.map((item) => {
                 if(setOne === false &&  item.imageSource == null) {
-                    this.updateList(item.key, data.uri);
+                    this.updateList(item.key, data.uri, data.width, data.height);
                     setOne = true;
                 }
             });
@@ -256,14 +263,15 @@ export default class MainCamera extends React.Component {
         });
     }
 
-    async updateList(key, source) {
+    async updateList(key, source, itemWidth, itemHeight) {
         this.setState(state => {
             const photos = state.photos.map((item) => {
-            if (item.key === key) {
-                return {key: item.key, imageSource: source};
-            } else {
-                return {key: item.key, imageSource: item.imageSource};
-            }
+                if (item.key === key) {
+                    console.warn(item.key, itemWidth, itemHeight);
+                    return {key: item.key, imageSource: source, width: itemWidth, height: itemHeight};
+                } else {
+                    return {key: item.key, imageSource: item.imageSource, width: item.width, height: item.height};
+                }
             });
     
             return {
