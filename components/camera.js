@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor } from 'react-native';
-import { Camera, Permissions, ImagePicker } from 'expo';
+import { Camera, Permissions, ImagePicker, ImageManipulator } from 'expo';
 
 export default class MainCamera extends React.Component {
     constructor(props) {
@@ -235,16 +235,28 @@ export default class MainCamera extends React.Component {
         if (this.camera) {
         const options = { quality: 0.5, base64: true };
         await this.camera.takePictureAsync(options).then(data => {
-            CameraRoll.saveToCameraRoll(data.uri);
+            var rate = data.width/1000;
 
-            var setOne = false;
-            this.state.photos.map((item) => {
-                if(setOne === false &&  item.imageSource == null) {
-                    this.updateList(item.key, data.uri, data.width, data.height);
-                    setOne = true;
-                }
+            console.warn(rate, data.width, data.height)
+            // Sadece boyutu düşer.
+            const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 1}).then((result) => {
+            //sadece %20 oranında sıkıştırır.
+            // const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width, height: data.height}}], {format: 'jpeg', compress: 0.8}).then((result) => {
+            //her ikisi
+            // const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
+                console.warn(rate, result.width, result.height)
+                CameraRoll.saveToCameraRoll(result.uri);
+
+                var setOne = false;
+                this.state.photos.map((item) => {
+                    if(setOne === false &&  item.imageSource == null) {
+                        this.updateList(item.key, result.uri, result.width, result.height);
+                        setOne = true;
+                    }
+                });
+                this.checkImagesAreSet();
             });
-            this.checkImagesAreSet();
+            
 
             this._getPhotosAsync(0).catch(error => {
                 console.error(error);
