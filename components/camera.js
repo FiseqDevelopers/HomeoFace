@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor } from 'react-native';
 import { Camera, Permissions, ImagePicker, ImageManipulator } from 'expo';
+import { LogInPopUp } from './'
 
 export default class MainCamera extends React.Component {
     constructor(props) {
@@ -42,6 +43,7 @@ export default class MainCamera extends React.Component {
         } else {
         return (
             <View style={styles.container}>
+                <LogInPopUp />
                 { this.renderCamera() }
                 <View style={styles.bottomBar}>
                     <View style={styles.gallery} >
@@ -154,27 +156,6 @@ export default class MainCamera extends React.Component {
         }
     }
 
-    handleUpload = async function() {
-        var tempUpload = new UploadPhotos('', '', '', '');
-        this.setState({
-            photosWillUpload: tempUpload
-        });
-    }
-
-    handleUploadPhoto = () => {
-        this.state.photos.map((item) => {
-            console.warn(item.imageSource);
-            var imageUrl = '';
-            if(Platform.OS === 'android') {
-                imageUrl = `data:image/jpg;base64,${item.imageSource.replace("file://", "").base64}`;
-            } else {
-                imageUrl = `data:image/jpg;base64,${item.imageSource.base64}`;
-            }
-            console.warn(imageUrl);
-            //imageUri && console.log({uri: imageUri.slice(0, 100)});
-        })
-    };
-
     sendData = async function() {
         // Upload the image using the fetch and FormData APIs
         var uuid = require('react-native-uuid');
@@ -224,26 +205,12 @@ export default class MainCamera extends React.Component {
         });
     }
 
-    createFormData = () => {
-        data.append("", 
-            this.state.uploadData
-        );
-      return data;
-    };
-
     snap = async function() {
         if (this.camera) {
         const options = { quality: 0.5, base64: true };
         await this.camera.takePictureAsync(options).then(data => {
             var rate = data.width/1000;
-
-            console.warn(rate, data.width, data.height)
-            // Sadece boyutu düşer.
-            const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 1}).then((result) => {
-            //sadece %20 oranında sıkıştırır.
-            // const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width, height: data.height}}], {format: 'jpeg', compress: 0.8}).then((result) => {
-            //her ikisi
-            // const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
+            const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
                 console.warn(rate, result.width, result.height)
                 CameraRoll.saveToCameraRoll(result.uri);
 

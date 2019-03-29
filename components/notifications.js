@@ -1,5 +1,6 @@
 import React from 'react';
-import {Block, Card} from './index';
+import Block from './block';
+import Card from './card'
 import { theme } from '../constants';
 import { Text, ScrollView, StyleSheet, View, SafeAreaView, Platform } from 'react-native' 
 
