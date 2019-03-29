@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Modal, Text, TouchableHighlight, View, SafeAreaView, Alert, TextInput, Button} from 'react-native';
+import {Modal, Text, TouchableHighlight, View, SafeAreaView, Alert, TextInput, Button, AsyncStorage} from 'react-native';
 import { styles } from './block';
 import { LoginModel } from '../models';
 
@@ -7,6 +7,11 @@ export default class LogInPopUp extends React.Component {
   state = {
     modalVisible: true,
   };
+
+  componentWillMount() {
+    console.warn(this.props.visible);
+    this.setState({modalVisible: this.props.visible});
+  }
 
   setModalVisible() {
     if(this.state.modalVisible){
@@ -17,19 +22,28 @@ export default class LogInPopUp extends React.Component {
   }
 
   async login() {
+
+    console.warn(user, password);
+
     var uuid = require('react-native-uuid');
     var loginModel = new LoginModel();
-    
+    loginModel.email = 'safakkizkin@gmail.com';
+    loginModel.password = 'Safak981*-';
     try{
       let response = await fetch("https://api.homeocure.net/homeo/login/loginuser", {
         method: 'POST',
         headers: {
+            'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(loginModel),
       });
-      console.warn(response);
+      if(response.ok) {
+        await AsyncStorage.setItem('@HomeoFace:user', loginModel.email);
+        await AsyncStorage.setItem('@HomeoFace:password', loginModel.password);
+        console.warn('kayıt başarılı.');
+      }
     } catch(error) {
       console.error(error);
     }

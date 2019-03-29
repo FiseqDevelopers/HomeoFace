@@ -43,7 +43,7 @@ export default class MainCamera extends React.Component {
         } else {
         return (
             <View style={styles.container}>
-                <LogInPopUp />
+                <LogInPopUp visible={this.props.isUserLoggedIn} />
                 { this.renderCamera() }
                 <View style={styles.bottomBar}>
                     <View style={styles.gallery} >
