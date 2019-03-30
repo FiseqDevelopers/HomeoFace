@@ -1,16 +1,19 @@
 import React, {Component} from 'react';
-import {Modal, Text, TouchableHighlight, View, SafeAreaView, Alert, TextInput, Button, AsyncStorage} from 'react-native';
+import {Modal, Text, View, Alert, TextInput, Button, AsyncStorage} from 'react-native';
 import { styles } from './block';
-import { LoginModel } from '../models';
+import { LoginModel, RegisterModel } from '../models';
+import DeviceInfo from 'react-native-device-info';
 
 export default class LogInPopUp extends React.Component {
   state = {
     modalVisible: true,
+    username: '',
+    password: '',
+    alreadPressed: false
   };
 
-  componentWillMount() {
-    console.warn(this.props.visible);
-    this.setState({modalVisible: this.props.visible});
+  async componentWillMount() {
+    this.setState({modalVisible: !this.props.isUserLoggedIn});
   }
 
   setModalVisible() {
@@ -22,13 +25,16 @@ export default class LogInPopUp extends React.Component {
   }
 
   async login() {
-
-    console.warn(user, password);
-
-    var uuid = require('react-native-uuid');
+    this.setState({alreadPressed: true});
     var loginModel = new LoginModel();
-    loginModel.email = 'safakkizkin@gmail.com';
-    loginModel.password = 'Safak981*-';
+    loginModel.appBuild = DeviceInfo.getBuildNumber();
+    loginModel.deviceName = DeviceInfo.getDeviceName();
+    loginModel.id = DeviceInfo.getDeviceId();
+    loginModel.model = DeviceInfo.getModel();
+    loginModel.version = DeviceInfo.getVersion();
+    loginModel.isDevice = !DeviceInfo.isEmulator();
+    loginModel.email = this.state.username;
+    loginModel.password = this.state.password;
     try{
       let response = await fetch("https://api.homeocure.net/homeo/login/loginuser", {
         method: 'POST',
@@ -42,11 +48,72 @@ export default class LogInPopUp extends React.Component {
       if(response.ok) {
         await AsyncStorage.setItem('@HomeoFace:user', loginModel.email);
         await AsyncStorage.setItem('@HomeoFace:password', loginModel.password);
-        console.warn('kayıt başarılı.');
+        this.setState({modalVisible: false});
       }
+      this.setState({alreadPressed: false});
     } catch(error) {
       console.error(error);
     }
+  }
+
+  async signup() {
+    this.setState({alreadPressed: true});
+    if(!this.state.username || !this.state.password) {
+      Alert.alert(
+        'Dikkat',
+        'Lütfen kayıt olmak için kullanıcı adı ve şifrenizi giriniz.',
+        [
+          {
+            text: 'İptal',
+            style: 'cancel',
+          },
+          {text: 'Tamam'},
+        ],
+        {cancelable: false},
+      );
+    } else {
+      var registerModel = new RegisterModel();
+      registerModel.fullName = this.state.username;
+      registerModel.email = this.state.username;
+      registerModel.password = this.state.password;
+
+      try{
+        let response = await fetch("https://api.homeocure.net/homeo/login/registeruser", {
+          method: 'POST',
+          headers: {
+              'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(registerModel),
+        });
+        
+        if(response.ok) {
+          await AsyncStorage.setItem('@HomeoFace:user', registerModel.email);
+          await AsyncStorage.setItem('@HomeoFace:password', registerModel.password);
+          this.setState({modalVisible: false});
+        } else {
+          var message = JSON.parse(response._bodyText);
+          
+          Alert.alert(
+            'Dikkat',
+            message.Message + ' Eğer şifrenizi unuttuysanız, lütfen HomeoCure uygulamasından şifremi unuttum bölümünden değişiklik yapınız.',
+            [
+              {
+                text: 'İptal',
+                style: 'cancel',
+              },
+              {text: 'Tamam'},
+            ],
+            {cancelable: false},
+          );
+        }
+        this.setState({alreadPressed: false});
+      } catch(error) {
+        console.error(error);
+      }
+    }
+    this.setState({alreadPressed: false});
   }
 
   render() {
@@ -55,24 +122,39 @@ export default class LogInPopUp extends React.Component {
         animationType="slide"
         transparent={true}
         visible={this.state.modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-        }}
+        onRequestClose={() => {}}
         style={{alignItems: 'center', justifyContent: 'center'}}>
         <View style={{backgroundColor: 'transparent', alignItems: 'center',justifyContent: 'center', flex:1}}>
           <View style={{backgroundColor: 'white', alignItems: 'center',justifyContent: 'center', width: '75%', height: '50%'}}>
-            <View style={{alignItems: 'center',justifyContent: 'center', flex:1}}>
+            <View style={{alignItems: 'center',justifyContent: 'center', flex:2}}>
                 <Text style={{color: '#9A9A9A', fontSize: 34}}>HomeoFace</Text>
             </View>
-            <View style={{alignItems: 'center', flex:2}}>
-              <TextInput placeholder = "Kullanıcı Adı:" style={{backgroundColor: '#EFEFEF', borderRadius: 10, width:'50%', fontSize: 21, padding: 7, margin:10}}/>
-              <TextInput placeholder = "Şifre:" style={{backgroundColor: '#EFEFEF', borderRadius: 10, width:'50%', fontSize: 21, padding: 7}}/>
+            <View style={{alignItems: 'center', flex:1.5, width: '50%'}}>
+              <TextInput 
+                placeholder = "Kullanıcı Adı:" 
+                onChangeText={(username) => this.setState({username})} 
+                style={{backgroundColor: '#EFEFEF', margin:10, marginBottom: 0, width: '100%', borderRadius: 10, fontSize: 21, padding: 7}}/>
+              <TextInput 
+                placeholder = "Şifre:" 
+                secureTextEntry={true} 
+                onChangeText={(password) => this.setState({password})} 
+                style={{backgroundColor: '#EFEFEF', margin:10, marginBottom: 0, width: '100%', borderRadius: 10, fontSize: 21, padding: 7}}/>
             </View>
-            <View style={{alignItems: 'center', flex:2}}>
-              <Button title='test' 
+            <View style={{alignItems: 'center', flex:1, flexDirection: 'row'}}>
+              <View style={{alignItems: 'center', margin:5}}>
+                <Button title='Giriş yap'
+                  disabled={this.state.alreadPressed}
+                  onPress={() => {
+                    this.login()
+                  }} />
+              </View>
+              <View style={{alignItems: 'center', margin:5}}>
+              <Button title='Kayıt Ol'
+                disabled={this.state.alreadPressed}
                 onPress={() => {
-                  this.login()
-                }} />
+                    this.signup()
+                  }} />
+              </View>
             </View>
           </View>
         </View>

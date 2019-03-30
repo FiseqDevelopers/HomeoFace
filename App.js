@@ -10,6 +10,7 @@ export default class App extends React.Component {
 
     this.state = {
       isUserLoggedIn: false,
+      swiperIndex: 0,
     }
   }
 
@@ -17,8 +18,9 @@ export default class App extends React.Component {
     const user = await AsyncStorage.getItem('@HomeoFace:user');
     const password = await AsyncStorage.getItem('@HomeoFace:password');
 
-    if(user === null || password === null) {
+    if(!user || !password) {
       this.setState({isUserLoggedIn: false});
+      console.warn(response.ok);
     } else {
       var loginModel = new LoginModel();
       loginModel.email = user;
@@ -33,6 +35,7 @@ export default class App extends React.Component {
           },
           body: JSON.stringify(loginModel),
         });
+        console.warn(response.ok);
         if(response.ok) {
           this.setState({isUserLoggedIn: true});
         }
@@ -40,18 +43,20 @@ export default class App extends React.Component {
         console.error(error);
       }
     }
-
-    console.warn(this.state.isUserLoggedIn, user, password);
   }
 
   componentWillMount() {
     this.checkIfUserAlreadyLoggedIn();
   }
 
+  handleIndex = (value) => {
+    this.refs.swiper.scrollBy(1);
+  }
+
   render() {
     return (
-      <Swiper loop={false} showsPagination={false} index={0}>
-        <MainCamera isUserLoggedIn={this.state.isUserLoggedIn} />
+      <Swiper ref='swiper' loop={false} showsPagination={false} index={0}>
+        <MainCamera isUserLoggedIn={this.state.isUserLoggedIn} onPageIndexChanged={this.handleIndex}/>
         <Notifications style={styles.wrapper} />
       </Swiper>
     );

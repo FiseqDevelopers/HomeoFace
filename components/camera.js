@@ -6,7 +6,7 @@ import { LogInPopUp } from './'
 export default class MainCamera extends React.Component {
     constructor(props) {
         super(props);
-
+        
         this.state = {
             hasCameraPermission: null,
             type: Camera.Constants.Type.back,
@@ -43,7 +43,7 @@ export default class MainCamera extends React.Component {
         } else {
         return (
             <View style={styles.container}>
-                <LogInPopUp visible={this.props.isUserLoggedIn} />
+                <LogInPopUp isUserLoggedIn={this.props.isUserLoggedIn} />
                 { this.renderCamera() }
                 <View style={styles.bottomBar}>
                     <View style={styles.gallery} >
@@ -64,7 +64,7 @@ export default class MainCamera extends React.Component {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.notifications} >
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={this.setIndex.bind(this, 1)}>
                             <Image source={require('../images/notifications.png')} style={{width: 40, height: 40}}/>
                         </TouchableOpacity>
                     </View>
@@ -135,6 +135,10 @@ export default class MainCamera extends React.Component {
         this.updateList(key, null, null, null);
     };
 
+    setIndex(val) {
+        this.props.onPageIndexChanged(val);
+    }
+
     _renderPhotos(photos) {
         if(photos == null) {
             <View style={styles.exampleImage} >
@@ -160,7 +164,6 @@ export default class MainCamera extends React.Component {
         // Upload the image using the fetch and FormData APIs
         var uuid = require('react-native-uuid');
         this.setState({guid_id: uuid.v1()});
-        console.warn(this.state.guid_id);
         
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
@@ -211,7 +214,6 @@ export default class MainCamera extends React.Component {
         await this.camera.takePictureAsync(options).then(data => {
             var rate = data.width/1000;
             const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
-                console.warn(rate, result.width, result.height)
                 CameraRoll.saveToCameraRoll(result.uri);
 
                 var setOne = false;

@@ -1,17 +1,17 @@
 export default class LoginModel {
-    email: string;
-    password: string;
-    isActive: bool;
-    appBuild: string;
-    appVersion: string;
-    deviceName: string;
-    id: string;
-    idiom: string;
-    isDevice: bool;
-    manufacturer: string;
-    model: string;
-    platform: string;
-    version: string;
+    email;
+    password;
+    isActive;
+    appBuild;
+    appVersion;
+    deviceName;
+    id;
+    idiom;
+    isDevice;
+    manufacturer;
+    model;
+    platform;
+    version;
 
     constructor(
         email = '',
