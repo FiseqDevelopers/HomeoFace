@@ -2,8 +2,8 @@
   "expoServerPort": 19000,
   "expoServerNgrokUrl": "https://ks-g5r.safaklx.homeoface-v2.exp.direct",
   "packagerNgrokUrl": "https://packager.ks-g5r.safaklx.homeoface-v2.exp.direct",
-  "ngrokPid": 25748,
+  "ngrokPid": 26440,
   "devToolsPort": 19002,
   "packagerPort": 19001,
-  "packagerPid": 25722
+  "packagerPid": 26421
 }

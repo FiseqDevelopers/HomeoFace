@@ -2,7 +2,7 @@ import React from 'react';
 import Block from './block';
 import Card from './card'
 import { theme } from '../constants';
-import { Text, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage } from 'react-native' 
+import { Text, Alert, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage } from 'react-native' 
 import DeviceInfo from 'react-native-device-info';
 import { LogoutModel } from '../models';
 import Moment from 'moment';
@@ -35,26 +35,41 @@ export default class Notifications extends React.Component {
         //this.setState({listOfData: getList});
     }
 
+    openResult(id) {
+        Alert.alert(
+            'Dikkat',
+            'Sonucunuz açıklandığında burada görünecektir.',
+            [
+              {
+                text: 'İptal',
+                style: 'cancel',
+              },
+              {text: 'Tamam'},
+            ],
+            {cancelable: false},
+          );
+    }
+
     async logOut() {
       try{
         var logoutModel = new LogoutModel(); 
         logoutModel.id = DeviceInfo.getDeviceId();
-        // let response = await fetch("https://api.homeocure.net/homeo/login/loginout", {
-        //   method: 'POST',
-        //   headers: {
-        //       'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
-        //       Accept: 'application/json',
-        //       'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(logoutModel),
-        // });
-        // if(response.ok) {
-        //   await AsyncStorage.removeItem('@HomeoFace:user');
-        //   await AsyncStorage.removeItem('@HomeoFace:password');
-        //   this.setState({modalVisible: true});
-        // }else {
-        //     this.setState({alreadPressed: false});
-        // }
+        let response = await fetch("https://api.homeocure.net/homeo/login/loginout", {
+          method: 'POST',
+          headers: {
+              'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(logoutModel),
+        });
+        if(response.ok) {
+          await AsyncStorage.removeItem('@HomeoFace:user');
+          await AsyncStorage.removeItem('@HomeoFace:password');
+          this.setState({modalVisible: true});
+        }else {
+            this.setState({alreadPressed: false});
+        }
       } catch(error) {
         console.error(error);
       }
@@ -98,20 +113,20 @@ export default class Notifications extends React.Component {
                             />
                         }
                         showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{alignItems: 'center', marginTop: 10, justifyContent: 'center'}}
-                    >
+                        contentContainerStyle={{alignItems: 'center', marginTop: 10, justifyContent: 'center'}} >
                     {
                         this.state.listOfData.map((item) => {
                             return (
-                                <Card shadow key={item.guid_id} style={{width: '80%'}}>
+                                <TouchableOpacity key={item.guid_id} style={{width: '80%'}} onPress={this.openResult.bind(this, item.guid_id)}>
+                                    <Card shadow>
                                     <Block>
                                          <Text>{Moment(item.date).format('L h:mm')}</Text>
                                     </Block>
                                 </Card>
+                                </TouchableOpacity>
                             )
                         })
                     }
-
                     </ScrollView>
                 </SafeAreaView>
             )
