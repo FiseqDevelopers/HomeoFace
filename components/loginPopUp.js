@@ -13,7 +13,6 @@ export default class LogInPopUp extends React.Component {
   };
 
   async componentDidMount() {
-    console.warn(1, this.props.isUserLoggedIn);
     this.setState({modalVisible: !this.props.isUserLoggedIn});
   }
 
@@ -51,10 +50,11 @@ export default class LogInPopUp extends React.Component {
         await AsyncStorage.setItem('@HomeoFace:password', loginModel.password);
         this.setState({modalVisible: false});
       }
-      this.setState({alreadPressed: false});
     } catch(error) {
       console.error(error);
     }
+
+    this.setState({alreadPressed: false});
   }
 
   async signup() {

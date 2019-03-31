@@ -25,7 +25,6 @@ export default class MainCamera extends React.Component {
             height: 512,
             isUserLoggedIn: props.isUserLoggedIn
         };
-        console.warn(this.state.isUserLoggedIn);
         this._pickImage.bind(this);
     }
 
