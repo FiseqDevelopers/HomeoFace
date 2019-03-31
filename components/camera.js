@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor, AsyncStorage } from 'react-native';
 import { Camera, Permissions, ImagePicker, ImageManipulator } from 'expo';
 import { LogInPopUp } from './'
+import ListModel from '../models/listModel';
 
 export default class MainCamera extends React.Component {
     constructor(props) {
@@ -197,19 +198,44 @@ export default class MainCamera extends React.Component {
             }, e => console.warn("cropImage:g ", e));
         });
 
-        return fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
+        const user_id = await AsyncStorage.getItem('@HomeoFace:user');
+        let response = await fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                user_id,
                 guid_id: this.state.guid_id,
                 front_side: this.state.front_side,
                 left_side: this.state.left_side,
                 right_side: this.state.right_side
             }),
         });
+        if(response.ok) {
+            const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
+            var dataList = JSON.parse(getList);
+            if(!dataList) {
+                dataList = [{
+                    guid_id: this.state.guid_id,
+                    date: new Date()
+                }];
+            } else {
+                dataList.push({
+                    guid_id: this.state.guid_id,
+                    date: new Date()
+                })
+            }
+            await AsyncStorage.setItem('@HomeoFace:sendingList', JSON.stringify(dataList))
+
+            this.setState({isAllSet: false});
+            this.updateList('left_side', null, null, null);
+            this.updateList('front_side', null, null, null);
+            this.updateList('right_side', null, null, null);
+        }
+
+        return response;
     }
 
     snap = async function() {

@@ -14,13 +14,16 @@ export default class App extends React.Component {
   }
 
   async checkIfUserAlreadyLoggedIn() {
-    
     const user = await AsyncStorage.getItem('@HomeoFace:user');
     const password = await AsyncStorage.getItem('@HomeoFace:password');
 
     if(!user || !password) {
       this.setState({isUserLoggedIn: false});
     }
+
+    // var loginModel = new LogoutModel();
+    // loginModel.id = user;
+    // loginModel.version = pDeviceInfo.getVersion();
 
     var loginModel = new LoginModel();
     loginModel.email = user;

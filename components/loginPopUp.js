@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {Modal, Text, View, Alert, TextInput, Button, AsyncStorage} from 'react-native';
-import { styles } from './block';
 import { LoginModel, RegisterModel } from '../models';
 import DeviceInfo from 'react-native-device-info';
 
