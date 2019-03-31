@@ -2,7 +2,7 @@ import React from 'react';
 import Block from './block';
 import Card from './card'
 import { theme } from '../constants';
-import { Text, ScrollView, StyleSheet, View, SafeAreaView, Platform } from 'react-native' 
+import { Text, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, Image} from 'react-native' 
 
 export default class Notifications extends React.Component {
     constructor(props) {
@@ -16,6 +16,9 @@ export default class Notifications extends React.Component {
                     <Text style={styles.notificationsText}>
                         Sonuçlar
                     </Text>
+                    <TouchableOpacity style={styles.logOut}>
+                        <Text>Çıkış</Text>
+                    </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.rewards} showsVerticalScrollIndicator={false}>
                     <Card shadow>
@@ -116,4 +119,11 @@ const styles = StyleSheet.create({
       bottom: 5,
       marginLeft: 5
     },
+    logOut: {
+      color: Platform.OS === 'android' ? 'white' : 'black',
+      fontSize: 50,
+      position: 'absolute',
+      bottom: 5,
+      marginRight:5
+    }
   })

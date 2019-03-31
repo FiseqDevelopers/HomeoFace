@@ -12,7 +12,8 @@ export default class LogInPopUp extends React.Component {
     alreadPressed: false
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
+    console.warn(1, this.props.isUserLoggedIn);
     this.setState({modalVisible: !this.props.isUserLoggedIn});
   }
 

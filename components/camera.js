@@ -6,7 +6,6 @@ import { LogInPopUp } from './'
 export default class MainCamera extends React.Component {
     constructor(props) {
         super(props);
-        
         this.state = {
             hasCameraPermission: null,
             type: Camera.Constants.Type.back,
@@ -23,9 +22,15 @@ export default class MainCamera extends React.Component {
             left_side: '',
             right_side: '',
             width: 512,
-            height: 512
+            height: 512,
+            isUserLoggedIn: props.isUserLoggedIn
         };
+        console.warn(this.state.isUserLoggedIn);
         this._pickImage.bind(this);
+    }
+
+    componentWillUpdate(nextProps) {
+        this.state.isUserLoggedIn = nextProps.isUserLoggedIn;
     }
 
     async componentDidMount() {
@@ -248,7 +253,6 @@ export default class MainCamera extends React.Component {
         this.setState(state => {
             const photos = state.photos.map((item) => {
                 if (item.key === key) {
-                    console.warn(item.key, itemWidth, itemHeight);
                     return {key: item.key, imageSource: source, width: itemWidth, height: itemHeight};
                 } else {
                     return {key: item.key, imageSource: item.imageSource, width: item.width, height: item.height};

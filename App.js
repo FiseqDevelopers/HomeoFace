@@ -9,22 +9,24 @@ export default class App extends React.Component {
     super(props);
 
     this.state = {
-      isUserLoggedIn: false,
       swiperIndex: 0,
     }
   }
 
   async checkIfUserAlreadyLoggedIn() {
+    
     const user = await AsyncStorage.getItem('@HomeoFace:user');
     const password = await AsyncStorage.getItem('@HomeoFace:password');
 
-    if(!user || !password) {
+    if(!user || !password) {
       this.setState({isUserLoggedIn: false});
-      console.warn(response.ok);
-    } else {
-      var loginModel = new LoginModel();
-      loginModel.email = user;
-      loginModel.password = password;
+    }
+
+    var loginModel = new LoginModel();
+    loginModel.email = user;
+    loginModel.password = password;
+    
+    return new Promise( async function(resolve, reject) {
       try{
         let response = await fetch("https://api.homeocure.net/homeo/login/loginuser", {
           method: 'POST',
@@ -35,18 +37,27 @@ export default class App extends React.Component {
           },
           body: JSON.stringify(loginModel),
         });
-        console.warn(response.ok);
         if(response.ok) {
-          this.setState({isUserLoggedIn: true});
+          resolve(true);
+        } else {
+          reject(false);
         }
       } catch(error) {
-        console.error(error);
+        reject(false);
       }
-    }
+    });
   }
 
-  componentWillMount() {
-    this.checkIfUserAlreadyLoggedIn();
+  async componentDidMount() {
+    this.checkIfUserAlreadyLoggedIn().then((val) => {
+      if(val) {
+        this.setState({isUserLoggedIn: true});
+      } else {
+        this.setState({isUserLoggedIn: false});
+      }
+    }, (error) => {
+      this.setState({isUserLoggedIn: false});
+    });
   }
 
   handleIndex = (value) => {
@@ -54,12 +65,16 @@ export default class App extends React.Component {
   }
 
   render() {
-    return (
-      <Swiper ref='swiper' loop={false} showsPagination={false} index={0}>
-        <MainCamera isUserLoggedIn={this.state.isUserLoggedIn} onPageIndexChanged={this.handleIndex}/>
-        <Notifications style={styles.wrapper} />
-      </Swiper>
-    );
+    if(this.state.isUserLoggedIn === undefined) {
+      return null;
+    } else {
+      return (
+        <Swiper ref='swiper' loop={false} showsPagination={false} index={0}>
+          <MainCamera isUserLoggedIn={this.state.isUserLoggedIn} onPageIndexChanged={this.handleIndex}/>
+          <Notifications style={styles.wrapper} />
+        </Swiper>
+      );
+    }
   }
 }
 
