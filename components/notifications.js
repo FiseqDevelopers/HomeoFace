@@ -2,7 +2,7 @@ import React from 'react';
 import Block from './block';
 import Card from './card'
 import { theme } from '../constants';
-import { Text, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage } from 'react-native' 
+import { Text, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage } from 'react-native' 
 import DeviceInfo from 'react-native-device-info';
 import { LogoutModel } from '../models';
 import Moment from 'moment';
@@ -12,19 +12,28 @@ export default class Notifications extends React.Component {
         super(props);
 
         this.state = {
-            listOfData: []
+            listOfData: [],
+            refreshing: false
         }
+    }
+
+    _onRefresh = () => {
+        this.setState({refreshing: true});
+        this.componentDidMount().then(() => {
+        });
     }
 
     async componentDidMount() {
         //console.warn(this.state.listOfData);
+        this.setState({listOfData: []});
         const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
-
         var l = JSON.parse(getList);
         console.warn(l);
         l.map((item) => {
             this.setState({listOfData:[...this.state.listOfData, item]});
-        })
+        });
+
+        this.setState({refreshing: false});
         //this.setState({listOfData: getList});
     }
 
@@ -83,8 +92,15 @@ export default class Notifications extends React.Component {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <ScrollView style={styles.rewards} showsVerticalScrollIndicator={false}>
-                    
+                    <ScrollView 
+                        style={styles.rewards} 
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                              refreshing={this.state.refreshing}
+                              onRefresh={this._onRefresh}
+                            />
+                          }>
                     {
                         this.state.listOfData.map((item) => {
                             return (
