@@ -24,11 +24,9 @@ export default class Notifications extends React.Component {
     }
 
     async componentDidMount() {
-        //console.warn(this.state.listOfData);
         this.setState({listOfData: []});
         const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
         var l = JSON.parse(getList);
-        console.warn(l);
         l.map((item) => {
             this.setState({listOfData:[...this.state.listOfData, item]});
         });
@@ -41,7 +39,6 @@ export default class Notifications extends React.Component {
       try{
         var logoutModel = new LogoutModel(); 
         logoutModel.id = DeviceInfo.getDeviceId();
-        console.warn(DeviceInfo.getAPILevel());
         // let response = await fetch("https://api.homeocure.net/homeo/login/loginout", {
         //   method: 'POST',
         //   headers: {
@@ -93,18 +90,20 @@ export default class Notifications extends React.Component {
                         </View>
                     </View>
                     <ScrollView 
-                        style={styles.rewards} 
-                        showsVerticalScrollIndicator={false}
+                        style={styles.rewards}
                         refreshControl={
-                            <RefreshControl
-                              refreshing={this.state.refreshing}
-                              onRefresh={this._onRefresh}
+                            <RefreshControl style={{flex:0, position: 'absolute', top: 0, left:0, backgroundColor: 'transparent'}}
+                            refreshing={this.state.refreshing}
+                            onRefresh={this._onRefresh}
                             />
-                          }>
+                        }
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{alignItems: 'center', marginTop: 10, justifyContent: 'center'}}
+                    >
                     {
                         this.state.listOfData.map((item) => {
                             return (
-                                <Card shadow key={item.guid_id}>
+                                <Card shadow key={item.guid_id} style={{width: '80%'}}>
                                     <Block>
                                          <Text>{Moment(item.date).format('L h:mm')}</Text>
                                     </Block>
@@ -122,8 +121,7 @@ export default class Notifications extends React.Component {
 
 const styles = StyleSheet.create({
     rewards: {
-      padding: theme.sizes.padding,
-      backgroundColor: theme.colors.gray2,
+      backgroundColor: theme.colors.gray2
     },
     // horizontal line
     hLine: {
