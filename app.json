@@ -23,7 +23,11 @@
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.homeocurex.homeoface",
       "supportsTablet": true
+    },
+    "android": {
+      "package": "com.homeocureinc.homeoface"
     }
   }
 }
