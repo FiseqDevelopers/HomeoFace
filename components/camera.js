@@ -24,6 +24,7 @@ export default class MainCamera extends React.Component {
             right_side: '',
             width: 512,
             height: 512,
+            isSnapped: false,
             isUserLoggedIn: props.isUserLoggedIn
         };
         this._pickImage.bind(this);
@@ -49,7 +50,9 @@ export default class MainCamera extends React.Component {
         return (
             <View style={styles.container}>
                 <LogInPopUp isUserLoggedIn={this.props.isUserLoggedIn} />
-                { this.renderCamera() }
+                {
+                    this.renderCamera()
+                }
                 <View style={styles.bottomBar}>
                     <View style={styles.gallery} >
                         <TouchableOpacity
@@ -64,7 +67,7 @@ export default class MainCamera extends React.Component {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.shutterButton} >
-                        <TouchableOpacity onPress={this.state.isAllSet ?  this.sendData.bind(this) : this.snap.bind(this)}>
+                        <TouchableOpacity disabled={this.state.isSnapped} onPress={this.state.isAllSet ?  this.sendData.bind(this) : this.snap.bind(this)}>
                             <Image source={this.state.isAllSet ? require('../images/upload.png') : require('../images/shutter.png')} style={{width: 60, height: 60}}/>
                         </TouchableOpacity>
                     </View>
@@ -123,10 +126,10 @@ export default class MainCamera extends React.Component {
 
     _pickImage = async (key) => {
         let result = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
+            allowsEditing: false,
             mediaTypes: 'Images',
-            quality: 1,
-            aspect: [4,4],
+            quality: 0.5,
+            aspect: [9,16],
         });
 
         if (!result.cancelled) {
@@ -195,7 +198,7 @@ export default class MainCamera extends React.Component {
                 } else {
                 }
               }, e => console.warn("getBase64ForTag: ", e))
-            }, e => console.warn("cropImage:g ", e));
+            }, e => console.warn("cropImage: ", e));
         });
 
         const user_id = await AsyncStorage.getItem('@HomeoFace:user');
@@ -228,40 +231,43 @@ export default class MainCamera extends React.Component {
                 })
             }
             await AsyncStorage.setItem('@HomeoFace:sendingList', JSON.stringify(dataList))
-
             this.setState({isAllSet: false});
             this.updateList('left_side', null, null, null);
             this.updateList('front_side', null, null, null);
             this.updateList('right_side', null, null, null);
         }
-
         return response;
     }
 
     snap = async function() {
-        if (this.camera) {
-        const options = { quality: 0.5, base64: true };
-        await this.camera.takePictureAsync(options).then(data => {
-            var rate = data.width/1000;
-            const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
-                CameraRoll.saveToCameraRoll(result.uri);
-
-                var setOne = false;
-                this.state.photos.map((item) => {
-                    if(setOne === false &&  item.imageSource == null) {
-                        this.updateList(item.key, result.uri, result.width, result.height);
-                        setOne = true;
-                    }
-                });
-                this.checkImagesAreSet();
-            });
-            
-
-            this._getPhotosAsync(0).catch(error => {
-                console.error(error);
-            });
+        this.setState({
+            isSnapped: true
         });
+        if (this.camera) {
+            const options = { quality: 0.5, base64: true };
+            await this.camera.takePictureAsync(options).then(data => {
+                
+                var rate = data.width/700;
+                const compressedData = ImageManipulator.manipulateAsync(data.uri, [{resize: {width: data.width/rate, height: data.height/rate}}], {format: 'jpeg', compress: 0.8}).then((result) => {
+                    CameraRoll.saveToCameraRoll(result.uri);
+                    var setOne = false;
+                    this.state.photos.map((item) => {
+                        if(setOne === false &&  item.imageSource == null) {
+                            this.updateList(item.key, result.uri, result.width, result.height);
+                            setOne = true;
+                        }
+                    });
+                    this.checkImagesAreSet();
+                });
+                this._getPhotosAsync(0).catch(error => {
+                    console.error(error);
+                });
+                
+            });
         }
+        this.setState({
+            isSnapped: false
+        });
     };
 
     // Check if all images are set to sent.

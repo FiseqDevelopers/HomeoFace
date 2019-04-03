@@ -20,11 +20,7 @@ export default class App extends React.Component {
     if(!user || !password) {
       this.setState({isUserLoggedIn: false});
     }
-
-    // var loginModel = new LogoutModel();
-    // loginModel.id = user;
-    // loginModel.version = pDeviceInfo.getVersion();
-
+    
     var loginModel = new LoginModel();
     loginModel.email = user;
     loginModel.password = password;
@@ -88,5 +84,4 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1
   }
-  
 });
