@@ -3,4 +3,6 @@ import Block from './block';
 import Card from './card';
 import Notifications from './notifications';
 import LogInPopUp from './loginPopUp';
-export { MainCamera, Block, Card, Notifications, LogInPopUp }
+import Result from './result';
+
+export { MainCamera, Block, Card, Notifications, LogInPopUp, Result }

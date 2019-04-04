@@ -16,35 +16,36 @@ export default class App extends React.Component {
   async checkIfUserAlreadyLoggedIn() {
     const user = await AsyncStorage.getItem('@HomeoFace:user');
     const password = await AsyncStorage.getItem('@HomeoFace:password');
+    const userId = await AsyncStorage.getItem('@HomeoFace:userId');
 
-    if(!user || !password) {
-      this.setState({isUserLoggedIn: false});
-    }
-    
-    var loginModel = new LoginModel();
-    loginModel.email = user;
-    loginModel.password = password;
-    
-    return new Promise( async function(resolve, reject) {
-      try{
-        let response = await fetch("https://api.homeocure.net/homeo/login/loginuser", {
-          method: 'POST',
-          headers: {
-              'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(loginModel),
-        });
-        if(response.ok) {
-          resolve(true);
-        } else {
+     if(!user || !password || !userId ) {
+      resolve(false);
+    } else {
+      var loginModel = new LoginModel();
+      loginModel.email = user;
+      loginModel.password = password;
+      
+      return new Promise( async function(resolve, reject) {
+        try{
+          let response = await fetch("https://api.homeocure.net/homeo/login/loginuser", {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(loginModel),
+          });
+          if(response.ok) {
+            resolve(true);
+          } else {
+            reject(false);
+          }
+        } catch(error) {
           reject(false);
         }
-      } catch(error) {
-        reject(false);
-      }
-    });
+      });
+    }
   }
 
   async componentDidMount() {

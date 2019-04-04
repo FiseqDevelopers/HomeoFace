@@ -262,7 +262,6 @@ export default class MainCamera extends React.Component {
                 this._getPhotosAsync(0).catch(error => {
                     console.error(error);
                 });
-                
             });
         }
         this.setState({

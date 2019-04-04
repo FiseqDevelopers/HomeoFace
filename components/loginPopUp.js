@@ -8,7 +8,7 @@ export default class LogInPopUp extends React.Component {
     modalVisible: true,
     username: '',
     password: '',
-    alreadPressed: false
+    alreadyPressed: false
   };
 
   async componentDidMount() {
@@ -24,7 +24,7 @@ export default class LogInPopUp extends React.Component {
   }
 
   async login() {
-    this.setState({alreadPressed: true});
+    this.setState({alreadyPressed: true});
     var loginModel = new LoginModel();
     loginModel.appBuild = DeviceInfo.getBuildNumber();
     loginModel.deviceName = DeviceInfo.getDeviceName();
@@ -45,6 +45,8 @@ export default class LogInPopUp extends React.Component {
         body: JSON.stringify(loginModel),
       });
       if(response.ok) {
+        var tst = JSON.parse(response._bodyInit);
+        await AsyncStorage.setItem('@HomeoFace:userId', tst.UserID.toString());
         await AsyncStorage.setItem('@HomeoFace:user', loginModel.email);
         await AsyncStorage.setItem('@HomeoFace:password', loginModel.password);
         this.setState({modalVisible: false});
@@ -53,11 +55,11 @@ export default class LogInPopUp extends React.Component {
       console.error(error);
     }
 
-    this.setState({alreadPressed: false});
+    this.setState({alreadyPressed: false});
   }
 
   async signup() {
-    this.setState({alreadPressed: true});
+    this.setState({alreadyPressed: true});
     if(!this.state.username || !this.state.password) {
       Alert.alert(
         'Dikkat',
@@ -89,6 +91,8 @@ export default class LogInPopUp extends React.Component {
         });
         
         if(response.ok) {
+          var tst = JSON.parse(response._bodyInit);
+          await AsyncStorage.setItem('@HomeoFace:userId', tst.UserID.toString());
           await AsyncStorage.setItem('@HomeoFace:user', registerModel.email);
           await AsyncStorage.setItem('@HomeoFace:password', registerModel.password);
           this.setState({modalVisible: false});
@@ -108,12 +112,12 @@ export default class LogInPopUp extends React.Component {
             {cancelable: false},
           );
         }
-        this.setState({alreadPressed: false});
+        this.setState({alreadyPressed: false});
       } catch(error) {
         console.error(error);
       }
     }
-    this.setState({alreadPressed: false});
+    this.setState({alreadyPressed: false});
   }
 
   render() {
@@ -143,14 +147,14 @@ export default class LogInPopUp extends React.Component {
             <View style={{alignItems: 'center', flex:1, flexDirection: 'row'}}>
               <View style={{alignItems: 'center', margin:5}}>
                 <Button title='Giriş yap'
-                  disabled={this.state.alreadPressed}
+                  disabled={this.state.alreadyPressed}
                   onPress={() => {
                     this.login()
                   }} />
               </View>
               <View style={{alignItems: 'center', margin:5}}>
               <Button title='Kayıt Ol'
-                disabled={this.state.alreadPressed}
+                disabled={this.state.alreadyPressed}
                 onPress={() => {
                     this.signup()
                   }} />
