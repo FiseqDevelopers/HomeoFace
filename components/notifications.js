@@ -41,7 +41,7 @@ export default class Notifications extends React.Component {
     }
 
     async openResult(id) {
-        var user_id = new GetAllResultsModel(await AsyncStorage.getItem('@HomeoFace:userId'), id);
+        var user_id = new GetAllResultsModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id);
         await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
             method: 'POST',
             headers: {
@@ -63,18 +63,18 @@ export default class Notifications extends React.Component {
         });
 
         Alert.alert(
-            'Dikkat',
-            'Sonucunuz açıklandığında burada görünecektir.',
-            [
-              {
-                text: 'İptal',
-                style: 'cancel',
-              },
-              {text: 'Tamam'},
-            ],
-            {cancelable: false},
-          );
-          return;
+          'Dikkat',
+          'Sonucunuz açıklandığında burada görünecektir.',
+          [
+            {
+              text: 'İptal',
+              style: 'cancel',
+            },
+            {text: 'Tamam'},
+          ],
+          {cancelable: false},
+        );
+        return;
     }
 
     async logOut() {

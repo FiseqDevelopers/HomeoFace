@@ -201,7 +201,7 @@ export default class MainCamera extends React.Component {
             }, e => console.warn("cropImage: ", e));
         });
 
-        const user_id = await AsyncStorage.getItem('@HomeoFace:user');
+        const user_id = parseInt(await AsyncStorage.getItem('@HomeoFace:userId'));
         let response = await fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
             method: 'POST',
             headers: {
