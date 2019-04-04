@@ -1,7 +1,7 @@
 import React from 'react';
 import { Result, Card, Block } from '../components';
 import { theme } from '../constants';
-import { Text, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage } from 'react-native' 
+import { Text, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage, Alert } from 'react-native' 
 import DeviceInfo from 'react-native-device-info';
 import { LogoutModel } from '../models';
 import Moment from 'moment';
@@ -58,8 +58,23 @@ export default class Notifications extends React.Component {
                 this.setState({right_side: 'data:image/png;base64,'+onje[0].right_side});
 
                 this.setState({visible: true});
+                return;
             }
         });
+
+        Alert.alert(
+            'Dikkat',
+            'Sonucunuz açıklandığında burada görünecektir.',
+            [
+              {
+                text: 'İptal',
+                style: 'cancel',
+              },
+              {text: 'Tamam'},
+            ],
+            {cancelable: false},
+          );
+          return;
     }
 
     async logOut() {
