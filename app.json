@@ -9,7 +9,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.0001",
+    "version": "1.0.0002",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -25,7 +25,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.homeocure.homeoface"
+      "bundleIdentifier": "com.homeocure.homeoface",
+      "infoPlist": {
+        "NSCameraUsageDescription": "HomeoFace need to use the camera for skin analysis which is the main purpose of this app.",
+        "NSPhotoLibraryUsageDescription": "You may need to upload saved pictures to make your skin analysis."
+      }
     },
     "android": {
       "package": "com.homeocureinc.homeoface"
