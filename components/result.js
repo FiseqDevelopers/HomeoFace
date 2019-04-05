@@ -32,10 +32,10 @@ export default class Result extends Component {
   }
 
   close() {
-      this.setState({modalVisible: false});
-      this.setState({front_side: ''});
-      this.setState({left_side: ''});
-      this.setState({right_side: ''});
+    this.setState({front_side: ''});
+    this.setState({left_side: ''});
+    this.setState({right_side: ''});
+    this.setState({modalVisible: false});
   }
 
   render() {

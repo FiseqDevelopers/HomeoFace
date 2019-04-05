@@ -12,6 +12,7 @@ export default class Notifications extends React.Component {
         super(props);
 
         this.state = {
+            photoArray: [],
             listOfData: [],
             refreshing: false,
             resultId: 0,
@@ -24,8 +25,8 @@ export default class Notifications extends React.Component {
 
     _onRefresh = () => {
         this.setState({refreshing: true});
-        this.setState({photoArray: null});
         this.setState({visible: false});
+        this.setState({photoArray: []});
         this.componentDidMount().then(() => {
         }, () => {
             this.setState({refreshing: false});
