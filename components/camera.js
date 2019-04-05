@@ -232,7 +232,7 @@ export default class MainCamera extends React.Component {
         if(this.state.left_side === '' || !this.state.right_side === '' || !this.state.front_side === '') {
             Alert.alert(
               'Dikkat',
-              'Sonucunuz açıklandığında burada görünecektir.',
+              'Lütfen tekrar gönderiniz bir hata ile karşılaşıldı.',
               [
                 {
                   text: 'İptal',
