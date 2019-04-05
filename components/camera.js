@@ -1,8 +1,7 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, Image, CameraRoll, Platform, ImageStore, ImageEditor, AsyncStorage } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Image, Alert, CameraRoll, Platform, ImageStore, ImageEditor, AsyncStorage } from 'react-native';
 import { Camera, Permissions, ImagePicker, ImageManipulator } from 'expo';
 import { LogInPopUp } from './'
-import ListModel from '../models/listModel';
 
 export default class MainCamera extends React.Component {
     constructor(props) {
@@ -168,16 +167,45 @@ export default class MainCamera extends React.Component {
         }
     }
 
+    async getResponseFromServer() {
+        let idString = await AsyncStorage.getItem('@HomeoFace:userId');
+        let photoJson = JSON.stringify({
+            user_id: parseInt(idString),
+            guid_id: this.state.guid_id,
+            front_side: this.state.front_side,
+            left_side: this.state.left_side,
+            right_side: this.state.right_side
+        });
+        return new Promise( async function(resolve, reject) {
+            try{
+                let response = await fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: photoJson
+                });
+                if(response.ok) {
+                  resolve(true);
+                } else {
+                  reject(false);
+                }
+              } catch(err) {
+                reject(false);
+            }
+        }); 
+    }
+
     sendData = async function() {
         // Upload the image using the fetch and FormData APIs
         var uuid = require('react-native-uuid');
         this.setState({guid_id: uuid.v1()});
-        
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
                 offset: { x: 0, y: 0 },
                 size: { width: item.width, height: item.height }
-            };
+            };            
 
             ImageEditor.cropImage(item.imageSource, imageSettings, (uri) => {
               ImageStore.getBase64ForTag(uri, (data) => {
@@ -196,27 +224,28 @@ export default class MainCamera extends React.Component {
                         right_side: data
                     });
                 } else {
+                    return;
                 }
               }, e => console.warn("getBase64ForTag: ", e))
             }, e => console.warn("cropImage: ", e));
         });
+        if(this.state.left_side === '' || !this.state.right_side === '' || !this.state.front_side === '') {
+            Alert.alert(
+              'Dikkat',
+              'Sonucunuz açıklandığında burada görünecektir.',
+              [
+                {
+                  text: 'İptal',
+                  style: 'cancel',
+                },
+                {text: 'Tamam'},
+              ],
+              {cancelable: false},
+            );
+            return;
+        }
 
-        const user_id = parseInt(await AsyncStorage.getItem('@HomeoFace:userId'));
-        let response = await fetch("https://facecuring.herokuapp.com/root/PhotosFromPhone", {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                user_id,
-                guid_id: this.state.guid_id,
-                front_side: this.state.front_side,
-                left_side: this.state.left_side,
-                right_side: this.state.right_side
-            }),
-        });
-        if(response.ok) {
+        this.getResponseFromServer().then(async (val) => {
             const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
             var dataList = JSON.parse(getList);
             if(!dataList) {
@@ -230,13 +259,27 @@ export default class MainCamera extends React.Component {
                     date: new Date()
                 })
             }
+
             await AsyncStorage.setItem('@HomeoFace:sendingList', JSON.stringify(dataList))
             this.setState({isAllSet: false});
             this.updateList('left_side', null, null, null);
             this.updateList('front_side', null, null, null);
             this.updateList('right_side', null, null, null);
-        }
-        return response;
+        }, (err) => {
+          Alert.alert(
+            'Dikkat',
+            'Bir hata ile karşılaşıldı lütfen başka bir zaman tekrar deneyiniz.',
+            [
+              {
+                text: 'İptal',
+                style: 'cancel',
+              },
+              {text: 'Tamam'},
+            ],
+            {cancelable: false},
+          );
+          return;
+        });
     }
 
     snap = async function() {

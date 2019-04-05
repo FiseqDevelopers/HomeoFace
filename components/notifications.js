@@ -24,7 +24,11 @@ export default class Notifications extends React.Component {
 
     _onRefresh = () => {
         this.setState({refreshing: true});
+        this.setState({photoArray: null});
+        this.setState({visible: false});
         this.componentDidMount().then(() => {
+        }, () => {
+            this.setState({refreshing: false});
         });
     }
 
@@ -37,44 +41,72 @@ export default class Notifications extends React.Component {
         });
 
         this.setState({refreshing: false});
-        //this.setState({listOfData: getList});
+    }
+
+    async getImagesFromServer(id) {
+        var user_id = new GetAllResultsModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id.toString());
+        return new Promise( async function(resolve, reject) {
+          try{
+            let response = await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(user_id),
+            });
+            if(response.ok) {
+              resolve(response._bodyInit);
+            } else {
+              reject(false);
+            }
+          } catch(error) {
+            reject(false);
+          }
+        });
     }
 
     async openResult(id) {
-        var user_id = new GetAllResultsModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id);
-        await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(user_id),
-        }).then((val) => {
-            if(val.ok) {
-                var onje = JSON.parse(val._bodyInit);
-                this.setState({front_side: 'data:image/png;base64,'+onje[0].front_side});
-                this.setState({left_side: 'data:image/png;base64,'+onje[0].left_side});
-                this.setState({right_side: 'data:image/png;base64,'+onje[0].right_side});
+        this.getImagesFromServer(id).then((val) => {
+            if(val) {
+                var onje = JSON.parse(val);
+
+                this.setState({photoArray: [
+                    {front_side: 'data:image/png;base64,'+onje.front_side},
+                    {left_side: 'data:image/png;base64,'+onje.left_side},
+                    {right_side: 'data:image/png;base64,'+onje.right_side}
+                ]});
 
                 this.setState({visible: true});
-                return;
+            } else {
+                Alert.alert(
+                  'Dikkat',
+                  'Sonucunuz açıklandığında burada görünecektir.',
+                  [
+                    {
+                      text: 'İptal',
+                      style: 'cancel',
+                    },
+                    {text: 'Tamam'},
+                  ],
+                  {cancelable: false},
+                );
             }
+        }, (err) => {
+            Alert.alert(
+              'Dikkat',
+              'Sonucunuz açıklandığında burada görünecektir.',
+              [
+                {
+                  text: 'İptal',
+                  style: 'cancel',
+                },
+                {text: 'Tamam'},
+              ],
+              {cancelable: false},
+            );
         });
-
-        Alert.alert(
-          'Dikkat',
-          'Sonucunuz açıklandığında burada görünecektir.',
-          [
-            {
-              text: 'İptal',
-              style: 'cancel',
-            },
-            {text: 'Tamam'},
-          ],
-          {cancelable: false},
-        );
-        return;
     }
 
     async logOut() {
@@ -123,7 +155,7 @@ export default class Notifications extends React.Component {
         } else {
             return (
                 <SafeAreaView style={{flex: 1}}>
-                    <Result visible={this.state.visible} frontSide={this.state.front_side} leftSide={this.state.left_side} rightSide={this.state.right_side}></Result>
+                    <Result photoArray={this.state.photoArray === null ? [] : this.state.photoArray}></Result>
                     <View style={{height: 120, backgroundColor: Platform.OS === 'android' ? 'black' : 'white'}} >
                         <Text style={styles.notificationsText}>
                             Sonuçlar
