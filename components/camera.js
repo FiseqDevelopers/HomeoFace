@@ -200,28 +200,36 @@ export default class MainCamera extends React.Component {
     sendData = async function() {
         // Upload the image using the fetch and FormData APIs
         var uuid = require('react-native-uuid');
-        this.setState({guid_id: uuid.v1()});
+        this.setState({guid_id: uuid.v1()}, () => {
+            console.log(this.state.guid_id)
+        });
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
                 offset: { x: 0, y: 0 },
                 size: { width: item.width, height: item.height }
-            };            
+            };
 
             ImageEditor.cropImage(item.imageSource, imageSettings, (uri) => {
               ImageStore.getBase64ForTag(uri, (data) => {
                 if(item.key === 'front_side') {
                     this.setState({
                         front_side: data
+                    }, () => {
+                        console.log(this.state.front_side);
                     });
                 }
                 else if(item.key === 'left_side'){
                     this.setState({
                         left_side: data
+                    }, () => {
+                        console.log(this.state.left_side);
                     });
                 }
                 else if(item.key === 'right_side') {
                     this.setState({
                         right_side: data
+                    }, () => {
+                        console.log(this.state.right_side);
                     });
                 } else {
                     return;
@@ -232,7 +240,7 @@ export default class MainCamera extends React.Component {
         if(this.state.left_side === '' || !this.state.right_side === '' || !this.state.front_side === '') {
             Alert.alert(
               'Dikkat',
-              'Lütfen tekrar gönderiniz bir hata ile karşılaşıldı.',
+              'Analize yolladığınız fotoğrafların analizi 10 dakika sürebilmektedir, lütfen bu uyarı mesajından sonra tekrar yollayınız.',
               [
                 {
                   text: 'İptal',
@@ -262,6 +270,9 @@ export default class MainCamera extends React.Component {
 
             await AsyncStorage.setItem('@HomeoFace:sendingList', JSON.stringify(dataList))
             this.setState({isAllSet: false});
+            this.setState({left_side: ''});
+            this.setState({front_side: ''});
+            this.setState({right_side: ''});
             this.updateList('left_side', null, null, null);
             this.updateList('front_side', null, null, null);
             this.updateList('right_side', null, null, null);
