@@ -19,7 +19,8 @@ export default class Notifications extends React.Component {
             front_side: '',
             left_side: '',
             right_side: '',
-            visible: false
+            visible: false,
+            detected_list: []
         }
     }
 
@@ -72,11 +73,12 @@ export default class Notifications extends React.Component {
         this.getImagesFromServer(id).then((val) => {
             if(val) {
                 var onje = JSON.parse(val);
-
+                
                 this.setState({photoArray: [
                     {front_side: 'data:image/png;base64,'+onje.front_side},
                     {left_side: 'data:image/png;base64,'+onje.left_side},
-                    {right_side: 'data:image/png;base64,'+onje.right_side}
+                    {right_side: 'data:image/png;base64,'+onje.right_side},
+                    {detected_list: onje.detected_list.split('-')}
                 ]});
 
                 this.setState({visible: true});
