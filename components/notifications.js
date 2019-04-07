@@ -43,7 +43,6 @@ export default class Notifications extends React.Component {
         let isThere = false;
         l.map((item, index) => {
             if(uniqueNames.length === 0) {
-                console.warn(2, item)
                 uniqueNames.push(item);
             } else {
                 uniqueNames.filter(function (el, index) {
@@ -60,7 +59,6 @@ export default class Notifications extends React.Component {
         });
 
         l = uniqueNames;
-        console.warn(3, l)
         l.reverse().map((item) => {
             this.setState({listOfData:[...this.state.listOfData, item]});
         });
