@@ -201,7 +201,6 @@ export default class MainCamera extends React.Component {
         // Upload the image using the fetch and FormData APIs
         var uuid = require('react-native-uuid');
         this.setState({guid_id: uuid.v1()}, () => {
-            console.log(this.state.guid_id)
         });
         const requests = this.state.photos.map((item) => {
             let imageSettings = {
@@ -215,22 +214,17 @@ export default class MainCamera extends React.Component {
                     this.setState({
                         front_side: data
                     }, () => {
-                        console.log(this.state.front_side);
                     });
                 }
                 else if(item.key === 'left_side'){
                     this.setState({
                         left_side: data
-                    }, () => {
-                        console.log(this.state.left_side);
-                    });
+                    }, () => {});
                 }
                 else if(item.key === 'right_side') {
                     this.setState({
                         right_side: data
-                    }, () => {
-                        console.log(this.state.right_side);
-                    });
+                    }, () => {});
                 } else {
                     return;
                 }
