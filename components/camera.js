@@ -273,9 +273,7 @@ export default class MainCamera extends React.Component {
             let isThere = false;
             let uniqueNames = [];
             dataList.map((item, index) => {
-                console.warn(uniqueNames, dataList)
                 if(uniqueNames === []) {
-                    console.warn('pushed')
                     uniqueNames.push(item);
                 }
                 else {
