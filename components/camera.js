@@ -262,10 +262,36 @@ export default class MainCamera extends React.Component {
                     date: new Date()
                 }];
             } else {
-                dataList.push({
+                const obj = {
                     guid_id: this.state.guid_id,
                     date: new Date()
-                })
+                };
+                if(!dataList.includes(obj)) {
+                    dataList.push(obj);
+                }
+            }
+            let isThere = false;
+            let uniqueNames = [];
+            dataList.map((item, index) => {
+                console.warn(uniqueNames, dataList)
+                if(uniqueNames === []) {
+                    console.warn('pushed')
+                    uniqueNames.push(item);
+                }
+                else {
+                    uniqueNames.filter(function (el, index) {
+                        if(el.guid_id === item.guid_id ) {
+                            isThere = true;
+                        }
+                    });
+                    if(!isThere) {
+                        uniqueNames.push(item);
+                    }
+                }
+            })
+
+            if(uniqueNames.length >0) {
+                dataList = uniqueNames;
             }
 
             await AsyncStorage.setItem('@HomeoFace:sendingList', JSON.stringify(dataList))

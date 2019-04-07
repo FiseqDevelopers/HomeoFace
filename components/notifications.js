@@ -37,7 +37,30 @@ export default class Notifications extends React.Component {
     async componentDidMount() {
         this.setState({listOfData: []});
         const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
+        
         var l = JSON.parse(getList);
+        let uniqueNames = [];
+        let isThere = false;
+        l.map((item, index) => {
+            if(uniqueNames.length === 0) {
+                console.warn(2, item)
+                uniqueNames.push(item);
+            } else {
+                uniqueNames.filter(function (el, index) {
+                    if(el.guid_id === item.guid_id ) {
+                        isThere = true;
+                    }
+                });
+
+                if(!isThere) {
+                    uniqueNames.push(item);
+                    isThere = false;
+                }
+            }
+        });
+
+        l = uniqueNames;
+        console.warn(3, l)
         l.reverse().map((item) => {
             this.setState({listOfData:[...this.state.listOfData, item]});
         });
@@ -72,14 +95,19 @@ export default class Notifications extends React.Component {
     async openResult(id) {
         this.getImagesFromServer(id).then((val) => {
             if(val) {
-                var onje = JSON.parse(val);
                 
+                var onje = JSON.parse(val);
+
                 this.setState({photoArray: [
                     {front_side: 'data:image/png;base64,'+onje.front_side},
                     {left_side: 'data:image/png;base64,'+onje.left_side},
                     {right_side: 'data:image/png;base64,'+onje.right_side},
-                    {detected_list: onje.detected_list.split('-')}
+                    
                 ]});
+
+                if(onje.detected_list !== undefined) {
+                    this.setState({detected_list: onje.detected_list.split('-')});
+                };
 
                 this.setState({visible: true});
             } else {

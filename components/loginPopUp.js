@@ -135,11 +135,11 @@ export default class LogInPopUp extends React.Component {
             </View>
             <View style={{alignItems: 'center', flex:1.5, width: '50%'}}>
               <TextInput 
-                placeholder = "Kullanıcı Adı:" 
+                placeholder = "E-Posta" 
                 onChangeText={(username) => this.setState({username})} 
                 style={{backgroundColor: '#EFEFEF', margin:10, marginBottom: 0, width: '100%', borderRadius: 10, fontSize: 21, padding: 7}}/>
               <TextInput 
-                placeholder = "Şifre:" 
+                placeholder = "Şifre" 
                 secureTextEntry={true} 
                 onChangeText={(password) => this.setState({password})} 
                 style={{backgroundColor: '#EFEFEF', margin:10, marginBottom: 0, width: '100%', borderRadius: 10, fontSize: 21, padding: 7}}/>
