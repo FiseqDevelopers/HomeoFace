@@ -93,20 +93,23 @@ export default class Notifications extends React.Component {
     async openResult(id) {
         this.getImagesFromServer(id).then((val) => {
             if(val) {
+                let onje = JSON.parse(val);
+                if(onje.detected_list.length > 0) {
+                    this.setState({photoArray: [
+                        {front_side: 'data:image/png;base64,'+onje.front_side},
+                        {left_side: 'data:image/png;base64,'+onje.left_side},
+                        {right_side: 'data:image/png;base64,'+onje.right_side},
+                        {detected_list: onje.detected_list.split('-')}
+                    ]});
+                }
+                else {
+                    this.setState({photoArray: [
+                        {front_side: 'data:image/png;base64,'+onje.front_side},
+                        {left_side: 'data:image/png;base64,'+onje.left_side},
+                        {right_side: 'data:image/png;base64,'+onje.right_side}
+                    ]});
+                }
                 
-                var onje = JSON.parse(val);
-
-                this.setState({photoArray: [
-                    {front_side: 'data:image/png;base64,'+onje.front_side},
-                    {left_side: 'data:image/png;base64,'+onje.left_side},
-                    {right_side: 'data:image/png;base64,'+onje.right_side},
-                    
-                ]});
-
-                if(onje.detected_list !== undefined) {
-                    this.setState({detected_list: onje.detected_list.split('-')});
-                };
-
                 this.setState({visible: true});
             } else {
                 Alert.alert(

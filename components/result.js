@@ -68,7 +68,7 @@ export default class Result extends Component {
                             {
                                 this.state.detected_list.map((item, index) => {
                                     return(
-                                        <Text style={{ color: 'white'}} key={index} >{item}</Text>
+                                        <Text style={{ color: 'white', marginLeft: 10}} key={index} >{item}</Text>
                                       );
                                 })
                             }
