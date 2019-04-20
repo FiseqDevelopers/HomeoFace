@@ -129,11 +129,11 @@ export default class LogInPopUp extends React.Component {
         onRequestClose={() => {}}
         style={{alignItems: 'center', justifyContent: 'center'}}>
         <View style={{backgroundColor: 'transparent', alignItems: 'center',justifyContent: 'center', flex:1}}>
-          <View style={{backgroundColor: 'white', alignItems: 'center',justifyContent: 'center', width: '75%', height: '50%'}}>
-            <View style={{alignItems: 'center',justifyContent: 'center', flex:2}}>
+          <View style={{backgroundColor: 'white', alignItems: 'center',justifyContent: 'center', width: '75%', minHeight: 300, height: 300}}>
+            <View style={{alignItems: 'center',justifyContent: 'center', flex:1}}>
                 <Text style={{color: '#9A9A9A', fontSize: 34}}>HomeoFace</Text>
             </View>
-            <View style={{alignItems: 'center', flex:1.5, width: '50%'}}>
+            <View style={{alignItems: 'center', flex:1, width: '50%'}}>
               <TextInput 
                 placeholder = "E-Posta" 
                 onChangeText={(username) => this.setState({username})} 
