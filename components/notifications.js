@@ -3,9 +3,8 @@ import { Result, Card, Block } from '../components';
 import { theme } from '../constants';
 import { Text, RefreshControl, ScrollView, StyleSheet, View, SafeAreaView, Platform, TouchableOpacity, AsyncStorage, Alert } from 'react-native' 
 import DeviceInfo from 'react-native-device-info';
-import { LogoutModel } from '../models';
+import { LogoutModel, GetAllResultsModel, GetTheResultModel } from '../models';
 import Moment from 'moment';
-import GetAllResultsModel from '../models/getAllResultsModel';
 
 export default class Notifications extends React.Component {
     constructor(props) {
@@ -34,57 +33,103 @@ export default class Notifications extends React.Component {
         });
     }
 
-    async componentDidMount() {
-        this.setState({listOfData: []});
-        const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
-        
-        var l = JSON.parse(getList);
-        let uniqueNames = [];
-        let isThere = false;
-        l.map((item, index) => {
-            if(uniqueNames.length === 0) {
-                uniqueNames.push(item);
-            } else {
-                uniqueNames.filter(function (el, index) {
-                    if(el.guid_id === item.guid_id ) {
-                        isThere = true;
-                    }
-                });
+    async askServerIfListFits() {
+        var user_id = parseInt(await AsyncStorage.getItem('@HomeoFace:userId'));
+        var count = this.state.listOfData.length;
+        if(user_id == null) {
+            return false;
+        }
+        if(count == null) {
+            count = 0;
+        }
 
-                if(!isThere) {
-                    uniqueNames.push(item);
-                    isThere = false;
-                }
-            }
-        });
-
-        l = uniqueNames;
-        l.reverse().map((item) => {
-            this.setState({listOfData:[...this.state.listOfData, item]});
-        });
-
-        this.setState({refreshing: false});
-    }
-
-    async getImagesFromServer(id) {
-        var user_id = new GetAllResultsModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id.toString());
+        var getAllResultsModel = new GetAllResultsModel(user_id, count);
         return new Promise( async function(resolve, reject) {
           try{
-            let response = await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
+            let response = await fetch("http://api2.homeocure.net/api/homeo/getallguidids", {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Basic 0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC', //'Basic': '0Tr0V+XwnVjhu26UIJim0Tr0Xw0kjydyd26U26Q7G6LQgxwVEC',
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(user_id),
+                body: JSON.stringify(getAllResultsModel),
             });
+
             if(response.ok) {
               resolve(response._bodyInit);
             } else {
               reject(false);
             }
           } catch(error) {
+            reject(false);
+          }
+        });
+    }
+ 
+    async componentDidMount() {
+        this.askServerIfListFits().then(async (val) => {
+            if(val != false) {
+                await AsyncStorage.setItem('@HomeoFace:sendingList', val);
+            }
+        }, (err) => {
+            console.warn("err:", err);
+        }).finally(async () => {
+            this.setState({listOfData: []});
+            const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
+            
+            var l = JSON.parse(getList);
+            let uniqueNames = [];
+            let isThere = false;
+            l.map((item, index) => {
+                if(uniqueNames.length === 0) {
+                    uniqueNames.push(item);
+                } else {
+                    uniqueNames.filter(function (el, index) {
+                        if(el.guid_id === item.guid_id ) {
+                            isThere = true;
+                        }
+                    });
+
+                    if(!isThere) {
+                        uniqueNames.push(item);
+                        isThere = false;
+                    }
+                }
+            });
+
+            l = uniqueNames;
+
+            l.reverse().map((item) => {
+                this.setState({listOfData:[...this.state.listOfData, item]});
+            });
+
+            this.setState({refreshing: false});
+        });
+    }
+
+    async getImagesFromServer(id) {
+
+        var getTheResultModel = new GetTheResultModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id.toString());
+
+        console.warn(getTheResultModel);
+        return new Promise( async function(resolve, reject) {
+          try{
+            let response = await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(getTheResultModel),
+            });
+            console.warn(response);
+            if(response.ok) {
+              resolve(response._bodyInit);
+            } else {
+              reject(false);
+            }
+          } catch(error) {
+            console.warn("err", error);
             reject(false);
           }
         });
@@ -214,7 +259,7 @@ export default class Notifications extends React.Component {
                                 <TouchableOpacity key={item.guid_id} style={{width: '80%'}} onPress={this.openResult.bind(this, item.guid_id)}>
                                     <Card shadow>
                                     <Block>
-                                         <Text>{Moment(item.date).format('L h:mm')}</Text>
+                                         <Text>{Moment(item.DateOf).format('L h:mm')}</Text>
                                     </Block>
                                 </Card>
                                 </TouchableOpacity>
@@ -254,3 +299,4 @@ const styles = StyleSheet.create({
       fontSize: 15,
     }
   })
+  
