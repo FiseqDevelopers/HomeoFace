@@ -9,7 +9,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.0007",
+    "version": "1.0.0008",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -33,7 +33,7 @@
     },
     "android": {
       "package": "com.homeocureinc.homeoface",
-      "versionCode": 7
+      "versionCode": 8
     }
   }
 }
