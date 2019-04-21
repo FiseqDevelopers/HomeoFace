@@ -1,12 +1,12 @@
 export default class GetAllResultsModel {
     user_id;
-    guid_id;
+    count;
 
     constructor(
         user_id = 0,
-        guid_id = ''
+        count = 0
     ) {
         this.user_id = user_id;
-        this.guid_id = guid_id;
+        this.count = count;
     }
 }

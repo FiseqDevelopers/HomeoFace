@@ -253,12 +253,12 @@ export default class MainCamera extends React.Component {
             if(!dataList) {
                 dataList = [{
                     guid_id: this.state.guid_id,
-                    date: new Date()
+                    dateOf: new Date()
                 }];
             } else {
                 const obj = {
                     guid_id: this.state.guid_id,
-                    date: new Date()
+                    dateOf: new Date()
                 };
                 if(!dataList.includes(obj)) {
                     dataList.push(obj);
