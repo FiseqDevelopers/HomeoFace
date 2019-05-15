@@ -54,7 +54,6 @@ export default class Notifications extends React.Component {
                 },
                 body: JSON.stringify(getAllResultsModel),
             });
-
             if(response.ok) {
               resolve(response._bodyInit);
             } else {
@@ -72,7 +71,8 @@ export default class Notifications extends React.Component {
                 await AsyncStorage.setItem('@HomeoFace:sendingList', val);
             }
         }, (err) => {
-            console.warn("err:", err);
+            this.setState({refreshing: false});
+            return;
         }).finally(async () => {
             this.setState({listOfData: []});
             const getList = await AsyncStorage.getItem('@HomeoFace:sendingList');
@@ -111,7 +111,6 @@ export default class Notifications extends React.Component {
 
         var getTheResultModel = new GetTheResultModel(parseInt(await AsyncStorage.getItem('@HomeoFace:userId')), id.toString());
 
-        console.warn(getTheResultModel);
         return new Promise( async function(resolve, reject) {
           try{
             let response = await fetch("http://api2.homeocure.net/api/homeo/getmaskedphotos", {
@@ -122,14 +121,12 @@ export default class Notifications extends React.Component {
                 },
                 body: JSON.stringify(getTheResultModel),
             });
-            console.warn(response);
             if(response.ok) {
               resolve(response._bodyInit);
             } else {
               reject(false);
             }
           } catch(error) {
-            console.warn("err", error);
             reject(false);
           }
         });
@@ -267,6 +264,9 @@ export default class Notifications extends React.Component {
                         })
                     }
                     </ScrollView>
+                    <View>
+                        <Text style={{fontSize:13, color:"#999999", backgroundColor:theme.colors.gray2, textAlign:'center'}}>Version: 1.0.0009</Text>
+                    </View>
                 </SafeAreaView>
             )
         }
